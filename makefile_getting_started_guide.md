@@ -13,24 +13,13 @@ This allows you to manage everything from the terminal, without opening the Ardu
 
 #### 1. Download Arduino CLI
 - Go to the official release page:
-  🔗 [Arduino CLI Releases](https://github.com/arduino/arduino-cli/releases)
-- Download the **ZIP file** for Windows (e.g., `arduino-cli_latest_Windows_64bit.zip`).
-- Extract the contents to a folder, such as `C:\arduino-cli`.
-
+```bash
+  curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+  sudo mv bin/arduino-cli /usr/local/bin/
+  ```
 ---
 
-#### 2. Add Arduino CLI to the System PATH (Optional, but Recommended)
-If you want to use `arduino-cli` from any directory, add it to the **system PATH**:
-
-1. Press `Win + R`, type `sysdm.cpl`, and press `Enter`.
-2. Go to the **Advanced** tab → click **Environment Variables**.
-3. In the **System Variables** section, find `Path` and click **Edit**.
-4. Click **New** and enter the path to the folder where you extracted Arduino CLI (e.g., `C:\arduino-cli`).
-5. Click **OK** to save the changes.
-
----
-
-####  3. Verify the Installation
+####  2. Verify the Installation
 Open **Command Prompt (cmd)** and type:
 ```bash
 arduino-cli version
@@ -40,44 +29,63 @@ arduino-cli version
 Before using the Makefile, ensure that you have installed the correct rp2040 core. You can do this by running the following command in your command prompt:
 
 ```bash
+arduino-cli version
+
 arduino-cli config init
+
 arduino-cli config add board_manager.additional_urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
 arduino-cli core update-index
+
 arduino-cli core install rp2040:rp2040
 ```
 
-Additionally, to run the Makefile on Windows, you need to install MinGW-w64. MinGW-w64 provides a complete toolchain including the GNU Compiler Collection (GCC) and other essential tools for compiling code on Windows. You can download it from the official [ MinGW-w64 website](https://github.com/niXman/mingw-builds-binaries/releases).
+Additionally, to run the Makefile on Windows, you need to install MinGW-w64. MinGW-w64 provides a complete toolchain including the GNU Compiler Collection (GCC) and other essential tools for compiling code on Windows. You can download it from 
+```bash
+sudo apt install -y mingw-w64
 
-Once downloaded, add the folder
-`C:\...\mingw64\bin`
-to your environment variables as a new PATH entry.
-
+x86_64-w64-mingw32-gcc --version
+```
 
 Next, you need to install GnuWin32 Make from a new cmd
 
 ```bash
-winget install GnuWin32.Make
+sudo apt update
+sudo apt install -y build-essential make automake autoconf gcc g++ coreutils grep sed findutils diffutils
+
+sudo nano /etc/apt/sources.list
+cat /etc/os-release
 ```
 
-Next,you need to install Powershell from cmd
+Next, paste
 
 ```bash
-winget install Microsoft.Powershell --source winget
+PRETTY_NAME="Debian GNU/Linux 13 (trixie)"
+NAME="Debian GNU/Linux"
+VERSION_ID="13"
+VERSION="13 (trixie)"
+VERSION_CODENAME=trixie
+DEBIAN_VERSION_FULL=13.1
+ID=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://bugs.debian.org/"
 ```
 
-Then restart the PC
-
-
-To verify that the installation of MinGW-w64 was successful, open a new command prompt and type:
+Then
 
 ```bash
-gcc --version
+sudo apt update
+sudo apt upgrade -y
 ```
 
 To verify that the installation of GnuWin32 was successful, open a new command prompt and run:
 
 ```bash
 make --version
+```
+
+```bash
+gcc --version
 ```
 If there are no errors and the respective versions of both tools are displayed, proceed with the installation of the libraries.
 
