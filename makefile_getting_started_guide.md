@@ -1,329 +1,133 @@
+🧰 Guide to Using the Makefile for Raspberry Pi Pico / Pico W (macOS Version)
+This guide explains how to compile, upload, and monitor a sketch on the Raspberry Pi Pico or Pico W using make and arduino-cli — all directly from the Terminal, without opening the Arduino IDE.
 
-# Guide to Using the Makefile for Raspberry Pi Pico / Pico W
+⚙️ 1. Install Arduino CLI
+You can install arduino-cli in two ways:
+Option A – via Homebrew (recommended)
+brew install arduino-cli
 
-This document explains how to **compile**, **upload**, and **monitor** a sketch on the **Raspberry Pi Pico** or **Raspberry Pi Pico W** using `make` and `arduino-cli`.
-This allows you to manage everything from the terminal, without opening the Arduino IDE.
+Option B – via the official installer
+curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+sudo mv bin/arduino-cli /usr/local/bin/
 
-***
-
-## ⚠️ Before Using the Makefile
-
-🔹 **Before executing any Makefile command, ensure you have installed `arduino-cli`.**
-
-
-#### 1. Download Arduino CLI
-- Go to the official release page:
-```bash
-  curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-  sudo mv bin/arduino-cli /usr/local/bin/
-  ```
----
-
-####  2. Verify the Installation
-Open **Command Prompt (cmd)** and type:
-```bash
-arduino-cli version
-```
-
-
-Before using the Makefile, ensure that you have installed the correct rp2040 core. You can do this by running the following command in your command prompt:
-
-```bash
+Verify installation
 arduino-cli version
 
+⚙️ 2. Install the Raspberry Pi Pico Core
+Run the following commands:
 arduino-cli config init
-
 arduino-cli config add board_manager.additional_urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
 arduino-cli core update-index
-
 arduino-cli core install rp2040:rp2040
-```
 
-Additionally, to run the Makefile on Windows, you need to install MinGW-w64. MinGW-w64 provides a complete toolchain including the GNU Compiler Collection (GCC) and other essential tools for compiling code on Windows. You can download it from 
-```bash
-sudo apt install -y mingw-w64
-
-x86_64-w64-mingw32-gcc --version
-```
-
-Next, you need to install GnuWin32 Make from a new cmd
-
-```bash
-sudo apt update
-sudo apt install -y build-essential make automake autoconf gcc g++ coreutils grep sed findutils diffutils
-
-sudo nano /etc/apt/sources.list
-cat /etc/os-release
-```
-
-Next, paste
-
-```bash
-PRETTY_NAME="Debian GNU/Linux 13 (trixie)"
-NAME="Debian GNU/Linux"
-VERSION_ID="13"
-VERSION="13 (trixie)"
-VERSION_CODENAME=trixie
-DEBIAN_VERSION_FULL=13.1
-ID=debian
-HOME_URL="https://www.debian.org/"
-SUPPORT_URL="https://www.debian.org/support"
-BUG_REPORT_URL="https://bugs.debian.org/"
-```
-
-Then
-
-```bash
-sudo apt update
-sudo apt upgrade -y
-```
-
-To verify that the installation of GnuWin32 was successful, open a new command prompt and run:
-
-```bash
-make --version
-```
-
-```bash
-gcc --version
-```
-If there are no errors and the respective versions of both tools are displayed, proceed with the installation of the libraries.
-
-Regarding the libraries, you can install the necessary ones using Arduino CLI with the following commands.
-
-
-```bash
+⚙️ 3. Install Required Libraries
+Install the required libraries using:
 arduino-cli lib update-index
-arduino-cli lib install "Adafruit GFX Library"
-arduino-cli lib install "Adafruit SH110X"
-```
-To test that everything is working correctly, open a terminal in Visual Studio and run "make help". If there are no errors, you can run "make compile" to compile.
+arduino-cli lib install "Adafruit GFX Library" "Adafruit SH110X"
 
+🧩 4. Verify Development Tools
+On macOS, gcc and make are already installed (if you have Xcode Command Line Tools).
+You can verify this with:
+gcc --version
+make --version
 
+If they are missing, install them with:
+xcode-select --install
 
-## Project Structure
+📁 5. Project Structure
+my_project/
+├── my_project.ino
+├── include/
+├── lib/
+│   ├── libA/
+│   │   └── src/
+│   │       ├── file.cpp
+│   │       └── file.h
+│   └── libB/
+│       └── src/
+│           ├── file.cpp
+│           └── file.h
+├── Makefile
+└── build/
 
-```bash
-my_project/              ← main folder (SKETCH_PATH)
-├── my_project.ino       ← main file
-├── include/             ← any .h headers
-├── lib/                 ← any custom libraries
-│   ├── libA/
-│   │   └── src/
-│   │       ├── file.cpp
-│   │       └── file.h
-│   └── libB/
-│       └── src/
-│           ├── file.cpp
-│           └── file.h
-├── Makefile             ← this file
-└── build/               ← (auto-created)
-```
-
-
-# Board Selection
-
-In the Makefile, there is the variable:
-
-```make
+🪛 6. Board Selection
+In your Makefile, find the line:
 BOARD_FQBN ?= rp2040:rp2040:rpipico
-```
 
-Depending on your board, change it as follows:
-
-- Raspberry Pi Pico --> rp2040:rp2040:rpipico
-- Raspberry Pi Pico W --> rp2040:rp2040:rpipicow
-
-To change it, open the Makefile and replace the line:
-
-```bash
-BOARD_FQBN ?= rp2040:rp2040:rpipico
-```
-
-with:
-
-```bash
-BOARD_FQBN ?= rp2040:rp2040:rpipicow
-```
+Change it to match your board:
 
 
-***
+| Board | BOARD_FQBN |
+| :-- | :-- |
+| Raspberry Pi Pico | rp2040:rp2040:rpipico |
+| Raspberry Pi Pico W | rp2040:rp2040:rpipicow |
 
-# Main Commands
-
-Navigate to the project folder:
-
-```bash
+⚡ 7. Compile the Project
+Navigate to your project folder:
 cd path/to/project
-```
 
-
-## Compile the Project
-
-```bash
+Compile:
 make compile
-```
 
-Compiles the sketch and generates `.bin` and `.uf2` files in `build/output`.
-
-- Compile a specific variant:
-
-```bash
-make compile MODULE_DEFINE="MK2_MOD2"
-```
-
-- Fast compile (no extra libraries):
-
-```bash
+This generates .bin and .uf2 files in build/output/.
+Other options:
 make compile_fast
-```
-
-- Compile all variants:
-
-```bash
 make compile_all
-```
 
-Compiles two versions (e.g., MK2_MOD1 and MK2_MOD2) in separate folders (`out_MK2_MOD1` and `out_MK2_MOD2`).
+🔼 8. Upload the Program
+Method 1 — BOOTSEL Mode (recommended)
+Hold the BOOTSEL button on your Pico.
+Connect it via USB while keeping BOOTSEL pressed.
+Release the button — your Pico will appear as a USB drive (e.g., /Volumes/RPI-RP2/).
+In your Makefile, make sure you have:
+DESTINATION ?= '/Volumes/RPI-RP2/'
 
-## Uploading the Program to the Pico
-
-After compilation, you can upload the program in two ways:
-
-### Method 1: Upload in BOOTSEL Mode
-
-This uses the .uf2 file and does not require the serial port.
-
-Procedure:
-
-- Press and hold the BOOTSEL button (the only one on the board).
-- Connect the Pico to the PC via USB while keeping BOOTSEL pressed.
-- Release the button: the PC will detect the Pico as an external drive (e.g. E:).
-- Open “This PC” and check the drive letter.
-- Open the Makefile and look for this line:
-
-```bash
-DESTINATION ?= 'D:\'
-```
-
-! Replace D: with the correct letter (e.g., 'E:\').
-You only need to do this once: the PC will always recognize the same drive.
-
-Uploading:
-
-```bash
+Then upload:
 make upload_bootsel
-```
 
-The .uf2 file will be automatically copied to the Pico and the program will start immediately.
+Method 2 — Upload via Serial Port
+If you want to upload via the serial interface instead:
+List available serial devices:
+ls /dev/tty.*
 
-For subsequent uploads:
-Put the Pico in BOOTSEL (hold the button before connecting) and run:
+You should see something like /dev/tty.usbmodem14101.
+Upload:
+make upload PORT=/dev/tty.usbmodem14101
 
-```bash
-make upload_bootsel
-```
+🖥️ 9. Open Serial Monitor
+To read Serial.print() outputs:
+make monitor PORT=/dev/tty.usbmodem14101
 
+Default baud rate: 115200.
 
-### Method 2: Upload via Serial Port (COM)
-
-This uses the serial port of the Pico connected to the PC normally.
-
-Procedure:
-
-- Connect the Pico to the PC (do not press BOOTSEL).
-- List available COM ports:
-
-```bash
-make port
-```
-
-
-A list such as the following will appear:
-
-```bash
-COM1
-COM2 (Raspberry Pi Pico)
-```
-
-If your Pico is connected on COM2, run:
-
-```bash
-make upload PORT=COM2
-```
-
-The Makefile will use the compiled .bin file and upload it automatically.
-
-## Open the Serial Monitor
-
-To view Serial.print or Serial.println messages from your program:
-
-Connect the Pico to the PC.
-
-Find the COM port:
-
-```bash
-make port
-```
-
-Open the serial monitor by specifying the port:
-
-```bash
-make monitor PORT=COM2
-```
-
-The default baud rate is 115200.
-
-## Clean Build Files
-
-Clean the entire build folder:
-
-```bash
+🧹 10. Clean Build Files
+Remove all build files:
 make clean_all
-```
 
-Partial clean (output folder only):
-
-```bash
+Remove only compiled outputs:
 make clean_output
-```
 
+🧾 11. Full Command Reference
 
-## Complete List of Commands
 
 | Command | Description |
 | :-- | :-- |
-| make compile | Compiles the project |
-| make compile_fast | Fast compile |
-| make compile_all | Compiles both versions (MK2_MOD1 and MK2_MOD2) |
-| make upload | Upload via serial port (COM) |
-| make upload_bootsel | Upload in BOOTSEL mode (USB drive) |
-| make monitor | Opens the serial monitor |
-| make port | Shows available COM ports |
-| make auto_com_port | Automatically detects Pico's COM |
-| make clean_all | Removes all build files |
-| make clean_output | Removes only output files |
-| make help | Shows command help |
+| make compile | Compile the project |
+| make compile_fast | Fast compile (skip extra libs) |
+| make compile_all | Compile all variants |
+| make upload | Upload via serial |
+| make upload_bootsel | Upload via USB BOOTSEL |
+| make monitor | Open serial monitor |
+| make clean_all | Remove all build files |
+| make clean_output | Remove only output files |
+| make help | Show help menu |
 
-## Useful Tips
-
-After the first upload in BOOTSEL, you don’t need to change DESTINATION again.
-
-If you have multiple Picos connected, always check which COM is assigned.
-
-You can chain commands:
-
-```bash
-make compile && make upload PORT=COM2
-```
-
-⚠️ Troubleshooting
+🩵 Tips \& Troubleshooting
 
 
-| Problem | Possible Cause | Solution |
+| Problem | Cause | Fix |
 | :-- | :-- | :-- |
-| Pico not listed in COM ports | Driver not installed | Install Pico USB drivers or use **BOOTSEL** mode |
-| `make upload` command fails | Incorrect COM port | Check with `make port` and update `PORT=COMx` |
-| Pico not appearing as external drive (BOOTSEL) | BOOTSEL button not held | Hold BOOTSEL before connecting Pico |
-| Compilation failed | Missing libraries | Make sure all libraries are in `lib/` or installed via `arduino-cli` |
-| Serial monitor shows nothing | Wrong baud rate or port | Ensure both code and Makefile have **115200** and the correct port |
+| Pico not visible as /Volumes/RPI-RP2 | Not in BOOTSEL mode | Hold BOOTSEL while connecting |
+| make upload fails | Wrong serial device | Check with ls /dev/tty.* |
+| Serial monitor empty | Wrong baud rate or port | Verify Serial.begin(115200) and make monitor port |
+| Compilation error | Missing libraries | Install with arduino-cli lib install ... |

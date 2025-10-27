@@ -25,7 +25,8 @@ ERROR_SYMBOL = "======================================== Compilation error! ====
 COMPILATION_SYMBOL = "======================================== Compilation in progress ========================================"
 
 MODULE_DEFINE ?= "MK2_MOD1"
-DESTINATION ?= /media/pi/RPI-RP2/
+DESTINATION ?= /Volumes/RPI-RP2/
+
 
 # Colored print macros for Linux
 print_green = printf "\033[1;32m%s\033[0m\n" "$1"
